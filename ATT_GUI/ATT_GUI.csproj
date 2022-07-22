@@ -8,7 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="att_icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Telnet" Version="0.8.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="att_icon.png" />
   </ItemGroup>
 
   <ItemGroup>
