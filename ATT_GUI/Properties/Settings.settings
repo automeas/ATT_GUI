@@ -14,5 +14,11 @@
     <Setting Name="port2" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4011</Value>
     </Setting>
+    <Setting Name="fine" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="sync" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

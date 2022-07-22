@@ -142,6 +142,17 @@ namespace ATT_GUI
             }
         }
 
+        public bool _IsFine = false;
+        public bool IsFine
+        {
+            get { return _IsFine; }
+            set
+            {
+                _IsFine = value;
+                NotifyPropertyChanged("IsFine");
+            }
+        }
+
         private double _att1 = 25;
         public double att1
         {
@@ -327,6 +338,7 @@ namespace ATT_GUI
                 {
 
                     if (!IsConnected1) break;
+                    if (client.IsConnected == false) break;
                     client.WriteLine("A?", linefeed);
                     Task<string> task2 = client.TerminatedReadAsync("\r", TimeSpan.FromMilliseconds(1000));
                     s = task2.Result;
@@ -342,12 +354,13 @@ namespace ATT_GUI
                             client.WriteLine("B" + att1.ToString() + "E", linefeed).Wait();
                             Task<string> task3 = client.TerminatedReadAsync("K", TimeSpan.FromMilliseconds(1000));
                             s = task3.Result;
+                            Trace.WriteLine("1:hex:" + stoh(s) + "|ASC:" + s);
                         }
                     }
                     else Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
                     for (int j = 0; j < 100; j++)
                     {
-
+                        if (client.IsConnected == false) break;
                         if ((int)(fvalue / step) == (int)(att1 / step) && IsConnected1) Task.Delay(100).Wait();
                         else break;
                     }
@@ -356,6 +369,7 @@ namespace ATT_GUI
                 }
                 client.Dispose();
                 Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
+                IsConnected1 = false;
             }
             catch (Exception e)
             {
@@ -393,7 +407,7 @@ namespace ATT_GUI
                 if (client.IsConnected == true) Trace.WriteLine("2:IsConnected == true");
                 else
                 {
-                    IsConnected1 = false;
+                    IsConnected2 = false;
                     return;
                 }
                 string s = "";
@@ -423,6 +437,7 @@ namespace ATT_GUI
                 {
 
                     if (!IsConnected2) break;
+                    if (client.IsConnected == false) break;
                     client.WriteLine("A?", linefeed);
                     Task<string> task2 = client.TerminatedReadAsync("\r", TimeSpan.FromMilliseconds(1000));
                     s = task2.Result;
@@ -444,13 +459,14 @@ namespace ATT_GUI
                     else Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
                     for (int j = 0; j < 100; j++)
                     {
-
+                        if (client.IsConnected == false) break;
                         if ((int)(fvalue / step) == (int)(att2 / step) && IsConnected2) Task.Delay(100).Wait();
                         else break;
                     }
                 }
                 client.Dispose();
                 Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
+                IsConnected2 = false;
             }
             catch (Exception e)
             {
@@ -497,6 +513,8 @@ namespace ATT_GUI
             Properties.Settings.Default.addr2 = addr2;
             Properties.Settings.Default.port1 = NumValue1;
             Properties.Settings.Default.port2 = NumValue2;
+            Properties.Settings.Default.fine = IsFine;
+            Properties.Settings.Default.sync = IsSync;
             Properties.Settings.Default.Save();
 
 
@@ -515,6 +533,8 @@ namespace ATT_GUI
             addr2 = Properties.Settings.Default.addr2 ;
             NumValue1 = Properties.Settings.Default.port1;
             NumValue2 = Properties.Settings.Default.port2;
+            IsFine = Properties.Settings.Default.fine;
+            IsSync = Properties.Settings.Default.sync;
 
 
         }

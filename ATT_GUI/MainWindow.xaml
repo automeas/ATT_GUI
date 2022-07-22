@@ -86,7 +86,7 @@
         <!--<ToggleButton x:Name="Linked" IsChecked="{Binding linked}" Style="{StaticResource AnimatedSwitch}" Grid.Column="1" Margin="76,10,108,14" RenderTransformOrigin="0.5,0.5" Grid.Row="1" /> -->
         <ToggleButton x:Name="Connect1" IsChecked="{Binding IsConnected1}" Style="{StaticResource AnimatedSwitch}" Grid.Column="1" Margin="129,26,10,2"  Grid.Row="0" Checked="Connect_Checked" />
         <ToggleButton x:Name="Connect2" IsChecked="{Binding IsConnected2}" Style="{StaticResource AnimatedSwitch}" Grid.Column="2" Margin="174,25,10,3"  Grid.Row="0" Checked="Connect_Checked2" />
-        <ToggleButton x:Name="Fine" Style="{StaticResource AnimatedSwitch}" Margin="33,8,0,0" Grid.Column="1" Grid.Row="1" Checked="Fine_Checked" Unchecked="Fine_Unchecked" HorizontalAlignment="Left" Width="70" Height="25" VerticalAlignment="Top" />
+        <ToggleButton x:Name="Fine" IsChecked="{Binding IsFine}" Style="{StaticResource AnimatedSwitch}" Margin="33,8,0,0" Grid.Column="1" Grid.Row="1" Checked="Fine_Checked" Unchecked="Fine_Unchecked" HorizontalAlignment="Left" Width="70" Height="25" VerticalAlignment="Top" />
         <ToggleButton x:Name="Sync" IsChecked="{Binding IsSync}" Style="{StaticResource AnimatedSwitch}" Margin="78,8,0,0" Grid.Column="2" Grid.Row="1" Checked="Sync_Checked" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="70" />
         <view:RotaryControl Grid.Column="0" Grid.Row="2" x:Name="atten1" Value="{Binding att1, Mode=TwoWay}" FontBrush="Black" FontSize="16" Foreground="Black" Background="Transparent" Margin="0,1,0,16" MouseWheel="att1_MouseWheel" NumberOfMinorTicks="{Binding step1, Mode=TwoWay}" Grid.ColumnSpan="2">
             <view:RotaryControl.MinimumValue>

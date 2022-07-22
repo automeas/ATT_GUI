@@ -70,5 +70,29 @@ namespace ATT_GUI.Properties {
                 this["port2"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool fine {
+            get {
+                return ((bool)(this["fine"]));
+            }
+            set {
+                this["fine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool sync {
+            get {
+                return ((bool)(this["sync"]));
+            }
+            set {
+                this["sync"] = value;
+            }
+        }
     }
 }
