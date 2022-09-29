@@ -40,6 +40,8 @@ namespace ATT_GUI
             }
         }
         private string _dialbackground2 = "DarkRed";
+        double SweepStep1 = 0;
+        double SweepStep2 = 0;
         public string DialBackground2
         {
             get
@@ -130,7 +132,7 @@ namespace ATT_GUI
                 NotifyPropertyChanged("IsConnected2");
             }
         }
-        
+
         public bool _IsSync = false;
         public bool IsSync
         {
@@ -139,6 +141,17 @@ namespace ATT_GUI
             {
                 _IsSync = value;
                 NotifyPropertyChanged("IsSync");
+            }
+        }
+
+        public bool _IsSweep = false;
+        public bool IsSweep
+        {
+            get { return _IsSweep; }
+            set
+            {
+                _IsSweep = value;
+                NotifyPropertyChanged("IsSweep");
             }
         }
 
@@ -262,13 +275,13 @@ namespace ATT_GUI
             DataContext = this;
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
         }
-        
+
         private void att1_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
             if (e.Delta > 0)
             {
-                atten1.Value = ((int)(atten1.Value/step) + 1) * step;
+                atten1.Value = ((int)(atten1.Value / step) + 1) * step;
                 if (IsSync) atten2.Value = ((int)(atten2.Value / step) + 1) * step;
             }
             else
@@ -298,8 +311,8 @@ namespace ATT_GUI
         public void Telnet1()
         {
             string linefeed = "\r";
-            
-            float fvalue = -1 ;
+
+            float fvalue = -1;
             System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowTrailingWhite;
             var ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
             try
@@ -346,20 +359,42 @@ namespace ATT_GUI
                     if (Single.TryParse(s, style, ci, out fvalue))
                     {
                         connected = true;
-                        Trace.WriteLine("1:Set value:" + fvalue.ToString());
-                        if ((int)(fvalue / step) == (int)(att1 / step)) Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(0, 50, 0))));
+                        Trace.WriteLine("1:Set value:" + fvalue.ToString() + " att1 value: " + att1.ToString());
+                        if ((int)(fvalue / step) == (int)(att1 / step))
+                        {
+                            Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(0, 50, 0))));
+                        }
                         else
                         {
-                            Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
+                            if (IsSweep && ((int)((fvalue + SweepStep1) / step) == (int)(att1 / step)))
+                            {
+                                Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(0, 50, 0))));
+                            }
+                            else Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
                             client.WriteLine("B" + att1.ToString() + "E", linefeed).Wait();
                             Task<string> task3 = client.TerminatedReadAsync("K", TimeSpan.FromMilliseconds(1000));
                             s = task3.Result;
                             Trace.WriteLine("1:hex:" + stoh(s) + "|ASC:" + s);
                         }
                     }
-                    else Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
+                    else
+                    {
+                        Dispatcher.Invoke((Action)(() => atten1.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
+                        Trace.WriteLine("fvalue Parse error");
+                    }
                     for (int j = 0; j < 100; j++)
                     {
+                        att1 += SweepStep1;
+                        if (att1 > 30)
+                        {
+                            att1 = 30;
+                            SweepStep1 *= -1;
+                        }
+                        if (att1 < 0)
+                        {
+                            att1 = 0;
+                            SweepStep1 *= -1;
+                        }
                         if (client.IsConnected == false) break;
                         if ((int)(fvalue / step) == (int)(att1 / step) && IsConnected1) Task.Delay(100).Wait();
                         else break;
@@ -386,7 +421,7 @@ namespace ATT_GUI
 
         private void Connect_Checked(object sender, RoutedEventArgs e)
         {
-            Task.Run(()=>Telnet1());
+            Task.Run(() => Telnet1());
         }
 
 
@@ -429,7 +464,7 @@ namespace ATT_GUI
                     }
                     else Trace.Write(".");
                 }
-                if (connected == true) 
+                if (connected == true)
                     Trace.WriteLine("\n2:Connected. Read value:" + fvalue.ToString());
                 else IsConnected2 = false;
 
@@ -445,24 +480,57 @@ namespace ATT_GUI
                     if (Single.TryParse(s, style, ci, out fvalue))
                     {
                         connected = true;
-                        Trace.WriteLine("2:Set value:" + fvalue.ToString());
-                        if ((int)(fvalue / step) == (int)(att2 / step)) Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(0, 50, 0))));
+                        Trace.WriteLine("         2:Set value:" + fvalue.ToString() + " att2 value: " + att2.ToString());
+                        if ((int)(fvalue / step) == (int)(att2 / step))
+                        {
+                            Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(0, 50, 0))));
+                        }
+
                         else
                         {
+                            if (IsSweep && ((int)((fvalue + SweepStep2) / step) == (int)(att2 / step)))
+                            {
+                                Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(0, 50, 0))));
+                            }
+                            else
                             Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
                             client.WriteLine("B" + att2.ToString() + "E", linefeed).Wait();
                             Task<string> task3 = client.TerminatedReadAsync("K", TimeSpan.FromMilliseconds(1000));
                             s = task3.Result;
-                            Trace.WriteLine("2:hex:" + stoh(s)+ "|ASC:" + s);
+                            Trace.WriteLine("2:hex:" + stoh(s) + "|ASC:" + s);
                         }
                     }
                     else Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
+
+
                     for (int j = 0; j < 100; j++)
                     {
+                        if (IsSync)
+                        {
+                            att2 = att1;
+                            SweepStep2 = SweepStep1;
+                        }
+                        else
+                        {
+                            att2 += SweepStep2;
+                            if (att2 > 30)
+                            {
+                                att2 = 30;
+                                SweepStep2 *= -1;
+                            }
+                            if (att2 < 0)
+                            {
+                                att2 = 0;
+                                SweepStep2 *= -1;
+                            }
+                        }
+
                         if (client.IsConnected == false) break;
                         if ((int)(fvalue / step) == (int)(att2 / step) && IsConnected2) Task.Delay(100).Wait();
                         else break;
                     }
+
+
                 }
                 client.Dispose();
                 Dispatcher.Invoke((Action)(() => atten2.OuterDialFill = new SolidColorBrush(Color.FromRgb(120, 0, 0))));
@@ -488,7 +556,7 @@ namespace ATT_GUI
 
 
 
-        public string stoh (string sample)
+        public string stoh(string sample)
         {
             byte[] ba = Encoding.Default.GetBytes(sample);
             var hexString = BitConverter.ToString(ba);
@@ -529,8 +597,8 @@ namespace ATT_GUI
                       listBoxUniqueIMSI.Items.Add(items);
                   }*/
 
-            addr1 = Properties.Settings.Default.addr1 ;
-            addr2 = Properties.Settings.Default.addr2 ;
+            addr1 = Properties.Settings.Default.addr1;
+            addr2 = Properties.Settings.Default.addr2;
             NumValue1 = Properties.Settings.Default.port1;
             NumValue2 = Properties.Settings.Default.port2;
             IsFine = Properties.Settings.Default.fine;
@@ -548,18 +616,36 @@ namespace ATT_GUI
         {
             step = 0.25;
             step1 = 19;
+            SweepStep1 = Math.Sign(SweepStep1) * step;
+            SweepStep2 = Math.Sign(SweepStep2) * step;
         }
 
         private void Fine_Unchecked(object sender, RoutedEventArgs e)
         {
             step = 1;
             step1 = 4;
+            SweepStep1 = Math.Sign(SweepStep1) * step;
+            SweepStep2 = Math.Sign(SweepStep2) * step;
         }
 
         private void Sync_Checked(object sender, RoutedEventArgs e)
         {
             atten2.Value = atten1.Value;
+            SweepStep2 = SweepStep1;
         }
+        private void Sweep_Checked(object sender, RoutedEventArgs e)
+        {
+            SweepStep1 = step;
+            SweepStep2 = step;
+        }
+        private void Sweep_UnChecked(object sender, RoutedEventArgs e)
+        {
+            SweepStep1 = 0;
+            SweepStep2 = 0;
+        }
+
+
+
     }
 
 
